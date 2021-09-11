@@ -29,6 +29,13 @@ class Block:
 
         print(self.hash)
 
+    def has_valid_transactions(self):
+        for transaction in self.transactions:
+            if not transaction.is_valid():
+                return False
+
+        return True
+
     def __str__(self):
         return json.dumps(self.to_dict(), indent=4)
 

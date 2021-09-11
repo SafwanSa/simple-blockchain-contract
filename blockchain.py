@@ -9,11 +9,11 @@ class BlockChain:
     def __init__(self):
         self.chain = [self.create_genesis_block()]
         self.pending_transactions = []
-        self.mining_reward = 0.1
+        self.mining_reward = 100
         self.difficulty = 2
 
     def create_genesis_block(self):
-        genesis = Block([Transaction('', '', 0)], 'hash')
+        genesis = Block([Transaction(None, None, 0)], 'hash')
         genesis.hash = genesis.calculate_hash()
         return genesis
 
@@ -29,10 +29,17 @@ class BlockChain:
         self.chain.append(block)
 
         self.pending_transactions = [
-            Transaction('', miner_reward_id, self.mining_reward)
+            Transaction(None, miner_reward_id, self.mining_reward)
         ]
 
-    def create_transaction(self, transaction):
+    def add_transaction(self, transaction):
+        if not transaction.from_id or not transaction.to_id:
+            raise Exception('Transaction must include from and to ids.')
+
+
+        if not transaction.is_valid():
+            raise Exception('Cannot add invalid transaction to the block.')
+
         self.pending_transactions.append(transaction)
 
     def get_balance_of_id(self, id):
@@ -51,6 +58,9 @@ class BlockChain:
         for i in range(1, len(self.chain)):
             current_block = self.chain[i]
             previous_block = self.chain[i - 1]
+
+            if not current_block.has_valid_transactions():
+                return False
 
             if current_block.hash != current_block.calculate_hash():
                 return False
